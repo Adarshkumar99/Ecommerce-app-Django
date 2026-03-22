@@ -2,36 +2,36 @@ name: Django CI
 
 on:
   push:
-    branches: [ "main" ]  # Run when code is pushed to main branch
+    branches: ["main"] # Run when code is pushed to main branch
   pull_request:
-    branches: [ "main" ]   # Run when pull request is created on main branch
+    branches: ["main"] # Run when pull request is created on main branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use Ubuntu as the CI environment
+    runs-on: ubuntu-latest # Use Ubuntu as the CI environment
 
     services:
-      postgres:                        # ← PostgreSQL
+      postgres: # ← PostgreSQL
         image: postgres:14
         env:
           POSTGRES_DB: test_ecommerce_db
           POSTGRES_USER: ecommerce_user
           POSTGRES_PASSWORD: 123456
         ports:
-          - 5432:5432  # Expose PostgreSQL port
+          - 5432:5432 # Expose PostgreSQL port
         options: >-
-          --health-cmd pg_isready   # Check if PostgreSQL is ready
-          --health-interval 10s   # Check every 10 seconds
-          --health-timeout 5s   # Wait 5 seconds for response
-          --health-retries 5   # Retry 5 times before failing
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4   # Clone the repository
+      - uses: actions/checkout@v4 # Clone the repository
 
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9'        # only 3.9
+          python-version: "3.9" # only 3.9
 
       - name: Install Dependencies
         run: |
