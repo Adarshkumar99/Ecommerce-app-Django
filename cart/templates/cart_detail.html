@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="card">
+        <div class="card-body">
+          <h1 class="text-center">Your Cart</h1>
+          {% if cart_items %}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cart_items %}
+                  <tr>  
+                    <td>{{ item.product.name }}</td>
+                    <td>${{ item.product.price }}</td>
+                    <td><a href="{% url 'remove_from_cart' item.product.id %}"><i class="bi bi-dash mx-1"></i></a><span class="border rounded px-3 py-1 bg-light"> {{ item.quantity }}
+                      </span><a href="{% url 'add_to_cart' item.product.id %}"><i class="bi bi-plus-lg mx-1"></i></a>
+                    </td> 
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div class="d-flex justify-content-between align-items-center">
+              <h3>Total: ${{ max_total_price }}</h3>
+              {% if user.is_authenticated %}
+                <a href="{% url 'checkout' %}" class="btn btn-success">Checkout</a>
+              {% else %}
+                <a href="{% url 'login' %}?next={% url 'cart_detail' %}" class="btn btn-primary">Checkout</a>
+              {% endif %}
+            </div>
+          {% else %}
+            <p>Your cart is empty.</p> 
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

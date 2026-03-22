@@ -1,0 +1,133 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  {% include 'core/carusol.html' %}
+  <div class="container mt-5 text-center">
+    <h1>Welcome to LifeStore</h1>
+    <p>Your one-stop shop for all your needs. Explore our wide range of products and enjoy a seamless shopping experience.</p>
+  </div>
+    <!-- <div class="container-fluid bg-light p-4 mt-5">
+      <h2 class="mb-4 text-center">Featured Products</h2>
+      <div class="row p-4 m-4">
+        {% for product in products %}
+          <div class="col-md-4 col-12 mb-4">
+            <div class="card h-100" style="width: 15rem;">
+              <a href="{% url 'product_detail' product.pk %}">
+              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+              </a>
+              <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description|truncatechars:30 | safe }}</p>
+                <p class="card-text"><strong>${{ product.price }}</strong></p>      
+                
+              </div>  
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div> -->
+  <!-- product item -->
+  <div class="container mb-5">
+    <div class="row text-center" id="item_list">
+      <div class="col-sm-4">
+        <a href="{% url 'product_list' %}?category=camera" class="text-decoration-none text-reset">
+          <div class="card">
+            <img src="{% static 'images/1.jpg' %}" alt="Cameras">
+            <div class="card-body">
+              <h3 class="card-text">Cameras</h3>
+              <p class="card-text">Choose among the best available in the world.</p>
+            </div>
+          </div> 
+        </a>
+      </div>
+
+      <div class="col-sm-4">
+        <a href="{% url 'product_list' %}?category=watch" class="text-decoration-none text-reset">
+          <div class="card">
+            <img src="{% static 'images/10.jpg' %}" alt="Watches">
+            <div class="card-body">
+              <h3 class="card-text">Watches</h3>
+              <p class="card-text">Original watches from the best brands.</p>
+            </div>
+          </div> 
+        </a>
+      </div>
+
+      <div class="col-sm-4">
+        <a href="{% url 'product_list' %}?category=shirt" class="text-decoration-none text-reset">
+          <div class="card">
+            <img src="{% static 'images/13.jpg' %}" alt="Shirts">
+            <div class="card-body">
+              <h3 class="card-text">Shirts</h3>
+              <p class="card-text">Our exquisite collection of shirts.</p>
+            </div>
+          </div> 
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- end product item -->
+
+  <!-- start new section detail -->
+<section class="py-5 bg-light mt-5">
+  <h4 class="fw-bold text-center mb-5">Why Shop With Us?</h4>
+  <div class="container">
+
+    <!-- SECTION 1 -->
+    <div class="row align-items-center mb-5">
+      <div class="col-md-6">
+        <h2 class="fw-bold">Fast & Secure Shopping</h2>
+        <p class="text-muted">
+          Shop your favorite products with lightning-fast checkout and secure payment options. 
+          We ensure your data and transactions are always protected.
+        </p>
+      </div>
+      <div class="col-md-6">
+        <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop"
+             class="img-fluid shadow-sm home-content-img" alt="Secure Shopping">
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="row align-items-center mb-5 flex-md-row-reverse">
+      <div class="col-md-6">
+        <h2 class="fw-bold">Track Your Orders Easily</h2>
+        <p class="text-muted">
+          Stay updated with real-time tracking. From checkout to delivery, know exactly where your order is.
+        </p>
+      </div>
+      <div class="col-md-6">
+          <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d" class="img-fluid shadow-sm home-content-img" alt="Order Tracking">
+        </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="row align-items-center mb-5">
+      <div class="col-md-6">
+        <h2 class="fw-bold">Quality Products Guaranteed</h2>
+        <p class="text-muted">
+          We offer only top-rated and verified products to ensure you get the best quality every time.
+        </p>
+      </div>
+      <div class="col-md-6">
+        <img src="https://images.unsplash.com/photo-1607083206968-13611e3d76db?q=80&w=1200&auto=format&fit=crop" class="img-fluid shadow-sm home-content-img" alt="Quality Products">
+      </div>
+    </div>
+  </div>
+</section>
+  <!-- end new section detail -->
+
+<!-- start top product scroller -->
+{% include 'core/top_product_scroller.html' %}
+<!-- end top product scroller -->
+
+<!-- start review section -->
+{% include 'core/review.html' %}
+<!-- end review section -->
+<!-- start about us section -->
+{% include 'core/about_us.html' %}
+<!-- end about us section -->
+
+{% endblock %}

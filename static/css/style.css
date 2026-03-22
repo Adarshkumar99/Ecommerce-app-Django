@@ -1,0 +1,7 @@
+
+.home-content-img {
+  max-height: 250px;
+  object-fit: cover;
+  width: 75%;
+  border-radius: 25px;
+}

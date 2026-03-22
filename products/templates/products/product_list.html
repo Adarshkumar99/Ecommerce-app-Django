@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="text-center mb-4 p-5 rounded w-85 mx-auto" style="background-color: rgb(193, 193, 193);">
+    <h1>Welcome to our Lifestyle Store!</h1>
+    <p>We have the best cameras, watches and shirts for you. No need to hunt around, we have all in one place.</p>
+  </div>
+  <div class="row">
+    {% for product in products %}
+      <div class="col-sm-3">
+        <div class="card mb-4 shadow-sm" style="width: 18rem;">
+          <!-- height: 20rem hatao, aur img pe display:block lagao -->
+          <a href="{% url 'product_detail' product.pk %}" style="display: block; overflow: hidden;">
+            <img src="{{ product.image.url }}" 
+                 class="card-img-top" 
+                 alt="{{ product.name }}" 
+                 style="height: 200px; object-fit: cover; display: block;">
+          </a>
+          <div class="card-body">
+            <h5 class="card-title text-center">{{ product.name }}</h5>
+            <p class="card-text text-center"><strong>Price: ${{ product.price }}</strong></p>
+            <div class="d-flex justify-content-center align-items-center">
+              {% if product.id|stringformat:"s" in cart_ids %}
+                <a href="{% url 'cart_detail' %}" class="btn btn-success btn-sm">
+                  <i class="bi bi-cart-check-fill mx-1"></i>Go to Cart
+                </a>
+              {% else %}
+                <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary btn-sm">
+                  <i class="bi bi-cart-check-fill mx-1"></i>Add to Cart
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
