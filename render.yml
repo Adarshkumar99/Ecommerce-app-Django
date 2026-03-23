@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: ecommerce-django
+    env: python
+
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+
+    startCommand: "gunicorn Ecommerce.wsgi:application"
+
+    envVars:
+      - key: DEBUG
+        value: False
+
+      - key: SECRET_KEY
+        generateValue: true
+
+      - key: ALLOWED_HOSTS
+        value: ecommerce-django.onrender.com
+
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://ecommerce-django.onrender.com
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ecommerce-db
+          property: connectionString

@@ -29,7 +29,10 @@ SECRET_KEY = 'django-insecure-ndztao!p&7jj7xojk&3&gs+1qlnjwe+v$&vikuq!10n2s-=kub
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['ecommerce-app-django-production.up.railway.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+]
 
 
 # Application definition
@@ -85,7 +88,7 @@ WSGI_APPLICATION = 'Ecommerce.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+#if not os.getenv("DATABASE_URL"):
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -99,10 +102,9 @@ WSGI_APPLICATION = 'Ecommerce.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '5432')}/{os.getenv('DB_NAME')}"
+        default=os.getenv('DATABASE_URL', '')
     )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
