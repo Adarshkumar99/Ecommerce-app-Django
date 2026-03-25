@@ -44,7 +44,7 @@ def category2(db):
 def product(db, category2):
     image = SimpleUploadedFile(
       name='test.jpg',
-      content=b'',   # khali file — sirf naam chahiye
+      content=b'',
       content_type='image/jpeg'
     )
     return Product.objects.create(

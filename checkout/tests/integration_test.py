@@ -65,15 +65,39 @@ def test_stripe_session_id_saved_in_order(mock_stripe, client, user, product, ca
 
 # ---- success ----
 @pytest.mark.django_db
-@patch('checkout.views.stripe.checkout.Session.retrieve')
-def test_success_updates_order_status(mock_retrieve, user, client, user_password):
+def test_success_page_loads(client, user, user_password):
     client.post(reverse('login'), {
         'username': user.username,
         'password': user_password,
     })
-    mock_retrieve.return_value = MagicMock(
-        payment_status='paid'
-    )
+    response = client.get(reverse('success'), {'session_id': 'cs_test_123'})
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_success_without_session_id_redirects(client, user, user_password):
+    client.post(reverse('login'), {
+        'username': user.username,
+        'password': user_password,
+    })
+    response = client.get(reverse('success'))
+    assert response.status_code == 302
+
+
+# ---- Webhook Tests ----
+@pytest.mark.django_db
+@patch('checkout.views.stripe.Webhook.construct_event')
+def test_webhook_updates_order_status(mock_event, client, user):
+    session = MagicMock()
+    session.id = 'cs_test_123'
+    session.payment_status = 'paid'
+
+    mock_event.return_value = {
+        'type': 'checkout.session.completed',
+        'data': {
+            'object': session  # ← dict ki jagah MagicMock
+        }
+    }
 
     order = Order.objects.create(
         user=user,
@@ -82,23 +106,30 @@ def test_success_updates_order_status(mock_retrieve, user, client, user_password
         stripe_session_id='cs_test_123'
     )
 
-    response = client.get(reverse('success'), {'session_id': 'cs_test_123'})
+    response = client.post(
+        reverse('stripe_webhook'),
+        data='{}',
+        content_type='application/json',
+        HTTP_STRIPE_SIGNATURE='test_sig'
+    )
 
     order.refresh_from_db()
     assert order.status == 'success'
     assert response.status_code == 200
 
-
 @pytest.mark.django_db
-@patch('checkout.views.stripe.checkout.Session.retrieve')
-def test_success_clears_cart(mock_retrieve, client, user, product, cart_with_item, user_password):
-    client.post(reverse('login'), {
-        'username': user.username,
-        'password': user_password,
-    })
-    mock_retrieve.return_value = MagicMock(
-        payment_status='paid'
-    )
+@patch('checkout.views.stripe.Webhook.construct_event')
+def test_webhook_clears_cart(mock_event, client, user, product, cart_with_item):
+    session = MagicMock()
+    session.id = 'cs_test_123'
+    session.payment_status = 'paid'
+
+    mock_event.return_value = {
+        'type': 'checkout.session.completed',
+        'data': {
+            'object': session
+        }
+    }
 
     Order.objects.create(
         user=user,
@@ -107,10 +138,14 @@ def test_success_clears_cart(mock_retrieve, client, user, product, cart_with_ite
         stripe_session_id='cs_test_123'
     )
 
-    client.get(reverse('success'), {'session_id': 'cs_test_123'})
+    client.post(
+        reverse('stripe_webhook'),
+        data='{}',
+        content_type='application/json',
+        HTTP_STRIPE_SIGNATURE='test_sig'
+    )
 
     assert not CartItem.objects.filter(cart=cart_with_item).exists()
-
 
 @pytest.mark.django_db
 @patch('checkout.views.stripe.checkout.Session.retrieve')
