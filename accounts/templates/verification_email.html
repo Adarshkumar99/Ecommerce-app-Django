@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8f9fa; font-family: Arial, sans-serif;">
+  
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa; padding: 40px 0;">
+    <tr>
+      <td align="center">       
+        <!-- Card -->
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+          <tr>
+            <td style="padding: 48px 48px 40px 48px;">
+              <!-- Heading -->
+              <h2 style="margin: 0 0 12px 0; font-size: 24px; font-weight: 700; color: #1a1a1a;">
+                Verify your email
+              </h2>
+
+              <!-- Subtext -->
+              <p style="margin: 0 0 32px 0; font-size: 15px; color: #6c757d; line-height: 1.6;">
+                Thanks for signing up! Please click the button below to verify your email address.
+              </p>
+
+              <!-- Button -->
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="{{ verification_link }}" 
+                   style="display: inline-block; padding: 14px 48px; background-color: #0d6efd; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 50px;">
+                  Verify Account
+                </a>
+              </div>
+
+              <!-- Divider -->
+              <hr style="border: none; border-top: 1px solid #e9ecef; margin: 32px 0;">
+
+              <!-- Fallback link -->
+              <p style="margin: 0 0 8px 0; font-size: 13px; color: #adb5bd;">
+                If the button doesn't work, copy and paste this link in your browser:
+              </p>
+              <a href="{{ verification_link }}" 
+                 style="font-size: 13px; color: #0d6efd; word-break: break-all;">
+                {{ verification_link }}
+              </a>
+
+              <!-- Ignore note -->
+              <p style="margin: 24px 0 0 0; font-size: 13px; color: #adb5bd;">
+                If you didn't create an account, you can safely ignore this email.
+              </p>
+
+            </td>
+          </tr>
+        </table>
+        <!-- Card End -->
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

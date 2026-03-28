@@ -24,8 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ndztao!p&7jj7xojk&3&gs+1qlnjwe+v$&vikuq!10n2s-=kub'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -88,7 +86,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Ecommerce.wsgi.application'
 
-
+# this is for local enable
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 #if not os.getenv("DATABASE_URL"):
@@ -156,8 +154,9 @@ MEDIA_URL = '/product_images/'
 MEDIA_ROOT = BASE_DIR / 'product_media'
 USE_CLOUDINARY = os.getenv("USE_CLOUDINARY") == "True"
 
+
+#production
 if USE_CLOUDINARY:
-  # Production
   DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
   import cloudinary
@@ -188,3 +187,9 @@ cloudinary.config(
     api_secret = os.getenv("CLOUDINARY_API_SECRET"),
 )
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'apikey'
+EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
