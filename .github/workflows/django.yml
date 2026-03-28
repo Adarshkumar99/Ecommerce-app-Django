@@ -45,5 +45,7 @@ jobs:
           DATABASE_URL: postgres://ecommerce_user:123456@localhost:5432/test_ecommerce_db
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          DEFAULT_FROM_EMAIL: ${{ secrets.DEFAULT_FROM_EMAIL }}
         run: |
           pytest --tb=short            # ← instead of manage.py -> pytest
