@@ -27,7 +27,7 @@ def UserRegister(request):
       uid = urlsafe_base64_encode(force_bytes(user.pk))
       token = email_token.make_token(user)
 
-      path = reverse('verify_email', kwargs={'uid': uid, 'token': token})
+      path = reverse('verify_email', kwargs={'uidb64': uid, 'token': token})
       verification_link = request.build_absolute_uri(path)
 
       html_message = render_to_string('verification_email.html', {
