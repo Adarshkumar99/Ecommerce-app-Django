@@ -4,7 +4,14 @@ from cart.helper.cart_util import get_cart_ids
 
 
 def product_list(request):
-    # Here we are checking if there is a category query parameter in the URL, if there is we filter the products by that category, otherwise we return all products
+    """
+    Displays the product catalog. Supports an optional `?category=`
+    query param to filter by category name (case-insensitive); shows
+    all products otherwise.
+
+    Also passes `cart_ids` so the template can render an "in cart"
+    state on each product card without a separate lookup per item.
+    """
     categories = request.GET.get('category')
     if categories:
         products = Product.objects.filter(category__name__iexact=categories)
@@ -19,6 +26,7 @@ def product_list(request):
 
 
 def product_detail(request, pk):
+    """Displays a single product's detail page, including its current cart status."""
     product = Product.objects.get(pk=pk)
     cart_ids = get_cart_ids(request)
 
