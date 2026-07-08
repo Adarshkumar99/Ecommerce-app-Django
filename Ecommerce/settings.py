@@ -14,9 +14,12 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import dj_database_url
-import cloudinary # for images on production
+import cloudinary  # for images on production
 
+# Load variables from a local .env file (ignored in production, where
+# real environment variables are set by the host, e.g. Render).
 load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,6 +31,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+# Comma-separated list of allowed hostnames, configurable per
+# environment via the ALLOWED_HOSTS env var (see render.yaml).
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -56,6 +61,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Serves compressed static files efficiently without a separate
+    # web server/CDN, works well on platforms like Render.
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -78,7 +85,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'cart.context_processor.cart_item_count',  # Add this line to include the cart item count in all templates
+                # Makes `cart_item_count` available in every template
+                # (powers the cart badge in the site header).
+                'cart.context_processor.cart_item_count',
             ],
         },
     },
@@ -86,21 +95,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Ecommerce.wsgi.application'
 
-# this is for local enable
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-#if not os.getenv("DATABASE_URL"):
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME'),
-#         'USER': os.getenv('DB_USER'),
-#         'PASSWORD': os.getenv('DB_PASSWORD'),
-#         'HOST': os.getenv('DB_HOST', 'localhost'),
-#         'PORT': os.getenv('DB_PORT', '5432'),
-#     }
-# }
-
+#
+# Uses dj_database_url so the same setting works both locally (via a
+# DATABASE_URL in .env) and on Render (which injects DATABASE_URL
+# automatically from the managed Postgres instance, see render.yaml).
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL', '')
@@ -144,18 +144,23 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Compresses and hashes static file names for cache-busting, served
+# via WhiteNoise without needing a separate static file host.
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# User-uploaded product images (local/dev storage path).
 MEDIA_URL = '/product_images/'
 MEDIA_ROOT = BASE_DIR / 'product_media'
+
+# Toggle between local media storage (dev) and Cloudinary (production),
+# controlled via the USE_CLOUDINARY env var.
 USE_CLOUDINARY = os.getenv("USE_CLOUDINARY") == "True"
 
-
-#production
 if USE_CLOUDINARY:
   DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
@@ -166,31 +171,49 @@ if USE_CLOUDINARY:
     api_secret = os.getenv("CLOUDINARY_API_SECRET"),
   )
 
+# Redirect target after a successful Django auth login (used by
+# built-in auth views; our custom accounts views redirect explicitly
+# instead, see accounts/views.py).
 LOGIN_REDIRECT_URL = '/'
 
+# Stripe API credentials, used by checkout/views.py for creating
+# Checkout Sessions and verifying webhook signatures.
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
+# Required when the site is served behind a proxy/load balancer over
+# HTTPS (e.g. Render) so Django's CSRF protection trusts the real origin.
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
 ]
+# Tells Django to trust the X-Forwarded-Proto header from the proxy so
+# request.is_secure() works correctly behind Render's load balancer.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
+# Cloudinary is configured unconditionally here as well (in addition
+# to the USE_CLOUDINARY block above) so the SDK has valid credentials
+# available even when only used ad-hoc (e.g. via the admin).
 cloudinary.config(
     cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key = os.getenv("CLOUDINARY_API_KEY"),
     api_secret = os.getenv("CLOUDINARY_API_SECRET"),
 )
 
+# Outgoing email (account verification links) is sent via SendGrid's
+# SMTP relay. See accounts/views.py -> UserRegister for usage.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'apikey'
+EMAIL_HOST_USER = 'apikey'  # SendGrid convention: literal string "apikey", the real secret goes in the password.
 EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+# Django's cryptographic signing key (sessions, password reset tokens,
+# email verification tokens, etc.). Must be kept secret and unique per
+# environment -- never commit a real value, always inject via env var.
 SECRET_KEY = os.getenv('SECRET_KEY')
