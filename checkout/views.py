@@ -12,6 +12,12 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def checkout(request):
+    """
+    Step 1 of checkout: collect a shipping address.
+
+    Requires login. On POST, saves the submitted address for the
+    current user and moves on to the Stripe payment step.
+    """
     if not request.user.is_authenticated:
         return redirect('login')
 
@@ -32,6 +38,15 @@ def checkout(request):
 
 
 def create_checkout_session(request):
+    """
+    Step 2 of checkout: build a Stripe Checkout Session from the
+    current cart and redirect the user to Stripe's hosted payment page.
+
+    An Order is created up front with status='pending' (and the
+    matching OrderItem rows), then linked to the Stripe session via
+    `stripe_session_id` so the webhook can find it later and mark it
+    paid once Stripe confirms payment.
+    """
     cart_items, total = get_cart_data(request)
     line_items = []
     domain = request.scheme + "://" + request.get_host()
@@ -43,6 +58,8 @@ def create_checkout_session(request):
     )
 
     for item in cart_items:
+        # Stripe expects amounts in the smallest currency unit (cents),
+        # hence the `* 100`.
         line_items.append({
             'price_data': {
                 'currency': 'usd',
@@ -53,6 +70,9 @@ def create_checkout_session(request):
             },
             'quantity': item['quantity'],
         })
+        # Snapshot the product name/price at time of purchase so the
+        # order record stays accurate even if the product is later
+        # renamed, repriced, or deleted.
         OrderItem.objects.create(
             order=order,
             product_name=item['product'].name,
@@ -76,6 +96,18 @@ def create_checkout_session(request):
 
 @csrf_exempt
 def stripe_webhook(request):
+    """
+    Receives asynchronous payment confirmation events directly from
+    Stripe's servers (not the user's browser), so it's CSRF-exempt and
+    instead verified using Stripe's own signature check
+    (`STRIPE_WEBHOOK_SECRET`). This is the source of truth for whether
+    a payment actually succeeded -- the success_url redirect alone
+    cannot be trusted, since a user could hit it without actually paying.
+
+    On a confirmed `checkout.session.completed` + paid event:
+      - marks the matching Order as 'success'
+      - empties the user's persisted cart
+    """
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
 
@@ -84,8 +116,10 @@ def stripe_webhook(request):
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
     except ValueError:
+        # Invalid payload.
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError:
+        # Signature didn't match -- request didn't actually come from Stripe.
         return HttpResponse(status=400)
 
     if event['type'] == 'checkout.session.completed':
@@ -97,16 +131,23 @@ def stripe_webhook(request):
                 order.status = 'success'
                 order.save()
 
+                # Payment confirmed -- safe to empty the cart now.
                 cart = Cart.objects.filter(user=order.user).first()
                 if cart:
                     CartItem.objects.filter(cart=cart).delete()
             except Order.DoesNotExist:
                 pass
 
+    # Always return 200 once handled, otherwise Stripe will keep retrying.
     return HttpResponse(status=200)
 
 
 def success(request):
+    """
+    Landing page after a successful Stripe redirect. Note: this page
+    alone does NOT confirm payment -- that's the webhook's job -- it's
+    purely a user-facing "thank you" screen.
+    """
     session_id = request.GET.get('session_id')
     if not session_id:
         return redirect('home')
@@ -114,4 +155,5 @@ def success(request):
 
 
 def cancel(request):
+    """Landing page shown if the user backs out of the Stripe payment page."""
     return render(request, 'cancel.html')
