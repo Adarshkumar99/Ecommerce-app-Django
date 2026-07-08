@@ -8,7 +8,6 @@ A full-stack e-commerce web application built with **Django**, featuring product
 ![Stripe](https://img.shields.io/badge/Stripe-payments-635BFF?logo=stripe&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)
 ![CI](https://github.com/Adarshkumar99/Ecommerce-app-Django/actions/workflows/django.yml/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
@@ -180,40 +179,6 @@ stripe listen --forward-to localhost:8000/checkout/webhook/
 ```
 
 Copy the webhook signing secret it prints into your `.env` as `STRIPE_WEBHOOK_SECRET`.
-
----
-
-## ☁️ Deployment
-
-This repo is pre-configured for one-click deployment to **Render** using `render.yaml`:
-
-- Auto-installs dependencies, runs `collectstatic`, and applies migrations on every deploy
-- Provisions a managed PostgreSQL database
-- Serves static files via WhiteNoise and media via Cloudinary in production
-
-To deploy your own instance, connect this repository to Render and it will pick up the blueprint automatically.
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Order history page for logged-in users
-- [ ] Product search & advanced filtering (`django-filter` is already a dependency)
-- [ ] Admin dashboard for sales analytics
-- [ ] Wishlist / saved items
-- [ ] Product reviews & ratings
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome. Feel free to check the [issues page](https://github.com/Adarshkumar99/Ecommerce-app-Django/issues).
-
----
-
-## 📄 License
-
-This project is open source and available under the MIT License.
 
 ---
 
